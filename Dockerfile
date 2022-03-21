@@ -2,7 +2,8 @@ FROM python:3.8
 
 ARG UID=1000
 ARG GID=1000
-ENV WORKDIR=/webapp/server
+ARG WORKDIR=/webapp/server
+ENV PORT=80
 
 RUN mkdir /opt/linchfin \
   && apt update \
@@ -10,10 +11,10 @@ RUN mkdir /opt/linchfin \
   && groupadd -g $GID linchfin \
   && useradd -g $GID -u $UID -d /home/linchfin -s /bin/bash linchfin
 
-ADD requirements.txt /opt/linchfin/requirements.txt
-RUN pip3 install -r /opt/linchfin/requirements.txt
+ADD requirements.txt $WORKDIR/requirements.txt
+RUN pip3 install -r $WORKDIR/requirements.txt
 
 ADD . $WORKDIR
 WORKDIR $WORKDIR
 USER linchfin
-CMD ["uvicorn", "main:app", "--reload"]
+CMD ["/bin/bash", "run.sh"]
