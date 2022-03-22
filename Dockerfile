@@ -7,6 +7,7 @@ ENV PORT=80
 
 RUN mkdir /opt/linchfin \
   && apt update \
+  && apt install git -y \
   && pip install --upgrade pip \
   && groupadd -g $GID linchfin \
   && useradd -g $GID -u $UID -d /home/linchfin -s /bin/bash linchfin
