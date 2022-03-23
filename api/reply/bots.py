@@ -67,15 +67,18 @@ class PortfolioBot(MetaBot):
     ACTION_KEYWORDS = ["포트폴리오"]
 
     def build_replies(self, payload) -> List[ABCSkillResponse]:
-        return [
-            ListCard(
-                header=ListCardHeader(title="원자재/리츠"),
-                items=[
-                    ListCardItem(title="PDBC(70%)", description="원자재 ETF"),
-                    ListCardItem(title="VNQ(30%)", description="리츠 ETF"),
-                ],
-            ),
-        ]
+        _portfolio = get_items(key="portfolio")
+        if _portfolio and "weights" in _portfolio:
+            return [
+                SimpleText(text=f"{_portfolio['base_date']} 기준 포트폴리오입니다."),
+                ItemCard(
+                    itemList=[
+                        ItemListRow(title=k, description=v)
+                        for k, v in _portfolio["weights"].items()
+                    ]
+                ),
+            ]
+        return [SimpleText(text="최신 포트폴리오가 등록되지 않았습니다.")]
 
 
 class UniverseBot(MetaBot):
