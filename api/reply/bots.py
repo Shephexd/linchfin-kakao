@@ -72,6 +72,7 @@ class PortfolioBot(MetaBot):
             return [
                 SimpleText(text=f"{_portfolio['base_date']} 기준 포트폴리오입니다."),
                 ItemCard(
+                    title=f"{_portfolio['base_date']}기준 포트폴리오",
                     itemList=[
                         ItemListRow(title=k, description=v)
                         for k, v in _portfolio["weights"].items()
