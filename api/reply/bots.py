@@ -56,7 +56,7 @@ class MetaBot:
         )
 
     def get_data(self, payload: SkillPayload):
-        return {}
+        return {"input_text": payload.input_text}
 
     @classmethod
     def match(cls, input_text: str):
