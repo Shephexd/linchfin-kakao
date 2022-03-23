@@ -10,7 +10,7 @@ from api.kakaoi.response.components.common import (
     ItemCardHead,
     ListCardHeader,
     ListCardItem,
-    ItemList,
+    ItemListRow,
     ItemListSummary,
     ItemCardImageTitle,
 )
@@ -67,7 +67,7 @@ class ItemCard(ABCSkillResponse):
     thumbnail: Thumbnail = None
     head: ItemCardHead = None
     imageTitle: ItemCardImageTitle = None
-    itemList: conlist(ItemList, min_items=1, max_items=10)
+    itemList: conlist(ItemListRow, min_items=1, max_items=10)
     itemListAlignment: str = "left"
     itemListSummary: ItemListSummary = None
     title: str = ""

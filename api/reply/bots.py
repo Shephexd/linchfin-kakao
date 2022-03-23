@@ -1,6 +1,10 @@
 from typing import List
 from api.kakaoi.request import SkillPayload
-from api.kakaoi.response.components.common import ListCardItem, ContextControl, ContextValue
+from api.kakaoi.response.components.common import (
+    ListCardItem,
+    ContextControl,
+    ContextValue,
+)
 from api.kakaoi.response.components.carousel import CarouselListCardRow
 from api.kakaoi.response.skills import (
     ABCSkillResponse,
@@ -10,10 +14,12 @@ from api.kakaoi.response.skills import (
     QuickReply,
     ListCardHeader,
     ListCard,
+    ItemCard,
+    ItemListRow,
     ListCardCarousel,
 )
-from linchfin.metadata import ETF_ASSETS, ETF_SECTORS
-from linchfin.core.clustering.sectors import SectorTree
+
+from api.firebase.realtime import get_items
 
 
 class MetaBot:
@@ -27,7 +33,7 @@ class MetaBot:
                 quickReplies=self.build_quick_replies(payload=payload),
             ),
             context=self.get_context(payload=payload),
-            data=self.get_data(payload=payload)
+            data=self.get_data(payload=payload),
         )
         return response_template
 
@@ -38,12 +44,15 @@ class MetaBot:
         quick_replies = [
             QuickReply(label="홈", messageText="홈"),
             QuickReply(label="포트폴리오", messageText="포트폴리오"),
-            QuickReply(label="유니버스", messageText="유니버스")
+            QuickReply(label="유니버스", messageText="유니버스"),
         ]
         return quick_replies
 
     def get_context(self, payload: SkillPayload) -> ContextControl:
-        return ContextControl(values=payload.contexts + [ContextValue(name=payload.input_text, lifeSpan=self.CONTEXT_LIFESPAN)])
+        return ContextControl(
+            values=payload.contexts
+            + [ContextValue(name=payload.input_text, lifeSpan=self.CONTEXT_LIFESPAN)]
+        )
 
     def get_data(self, payload: SkillPayload):
         return {}
@@ -77,9 +86,7 @@ class UniverseBot(MetaBot):
         items = [
             CarouselListCardRow(
                 header=ListCardHeader(title=_sector_name),
-                items=[
-                    ListCardItem(**_asset) for _asset in _assets
-                ]
+                items=[ListCardItem(**_asset) for _asset in _assets],
             )
             for _sector_name, _assets in self.iter_items(payload)
         ]
@@ -103,16 +110,6 @@ class UniverseBot(MetaBot):
             ],
             "변동성": [
                 dict(title="VIXM", description="중기 변동성 ETF"),
-            ]
+            ],
         }
         return item_context.items()
-
-
-if __name__ == "__main__":
-    _tree = SectorTree(ETF_SECTORS)
-    CarouselListCardRow(
-        header=ListCardHeader(title="변동성"),
-        items=[
-            ListCardItem(title="VIXM", description="중기 변동성 ETF"),
-        ],
-    )

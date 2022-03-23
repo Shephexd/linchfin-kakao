@@ -10,10 +10,7 @@ from api.reply.bots import MetaBot, PortfolioBot, UniverseBot
 
 
 class BotRouter:
-    bot_map = {
-        PortfolioBot: [],
-        UniverseBot: []
-    }
+    bot_map = {PortfolioBot: [], UniverseBot: []}
 
     def reply(self, payload: SkillPayload) -> SkillResponse:
         _bot = self.select(payload=payload)
