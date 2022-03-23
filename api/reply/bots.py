@@ -52,7 +52,13 @@ class MetaBot:
     def get_context(self, payload: SkillPayload) -> ContextControl:
         return ContextControl(
             values=payload.contexts
-            + [ContextValue(name=payload.input_text, lifeSpan=self.CONTEXT_LIFESPAN)]
+            + [
+                ContextValue(
+                    name="payload",
+                    lifeSpan=self.CONTEXT_LIFESPAN,
+                    params={"input_text", payload.input_text},
+                )
+            ]
         )
 
     def get_data(self, payload: SkillPayload):
@@ -77,7 +83,7 @@ class PortfolioBot(MetaBot):
                     itemList=[
                         ItemListRow(title=k, description=v)
                         for k, v in _portfolio["weights"].items()
-                    ]
+                    ],
                 ),
             ]
         return [SimpleText(text="최신 포트폴리오가 등록되지 않았습니다.")]

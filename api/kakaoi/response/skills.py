@@ -29,7 +29,7 @@ class ABCSkillResponse(BaseModel, metaclass=ABCMeta):
         return _skill_name[0].lower() + _skill_name[1:]
 
     def dict(self, *args, **kwargs):
-        kwargs['exclude_none'] = True
+        kwargs["exclude_none"] = True
         return {self.skill_name: super().dict(*args, **kwargs)}
 
     def as_item(self):
