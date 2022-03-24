@@ -1,6 +1,10 @@
 from typing import List
 from api.kakaoi.request import SkillPayload
-from api.kakaoi.response.components.common import ListCardItem, ContextControl, ContextValue
+from api.kakaoi.response.components.common import (
+    ListCardItem,
+    ContextControl,
+    ContextValue,
+)
 from api.kakaoi.response.components.carousel import CarouselListCardRow
 from api.kakaoi.response.skills import (
     ABCSkillResponse,
@@ -10,10 +14,13 @@ from api.kakaoi.response.skills import (
     QuickReply,
     ListCardHeader,
     ListCard,
+    ItemCardHead,
+    ItemCard,
+    ItemListRow,
     ListCardCarousel,
 )
-from linchfin.metadata import ETF_ASSETS, ETF_SECTORS
-from linchfin.core.clustering.sectors import SectorTree
+
+from api.firebase.realtime import get_items
 
 
 class MetaBot:
@@ -27,7 +34,7 @@ class MetaBot:
                 quickReplies=self.build_quick_replies(payload=payload),
             ),
             context=self.get_context(payload=payload),
-            data=self.get_data(payload=payload)
+            data=self.get_data(payload=payload),
         )
         return response_template
 
@@ -38,15 +45,24 @@ class MetaBot:
         quick_replies = [
             QuickReply(label="홈", messageText="홈"),
             QuickReply(label="포트폴리오", messageText="포트폴리오"),
-            QuickReply(label="유니버스", messageText="유니버스")
+            QuickReply(label="유니버스", messageText="유니버스"),
         ]
         return quick_replies
 
     def get_context(self, payload: SkillPayload) -> ContextControl:
-        return ContextControl(values=payload.contexts + [ContextValue(name=payload.input_text, lifeSpan=self.CONTEXT_LIFESPAN)])
+        return ContextControl(
+            values=payload.contexts
+            + [
+                ContextValue(
+                    name="payload",
+                    lifeSpan=self.CONTEXT_LIFESPAN,
+                    params={"input_text", payload.input_text},
+                )
+            ]
+        )
 
     def get_data(self, payload: SkillPayload):
-        return {}
+        return {"input_text": payload.input_text}
 
     @classmethod
     def match(cls, input_text: str):
@@ -58,15 +74,19 @@ class PortfolioBot(MetaBot):
     ACTION_KEYWORDS = ["포트폴리오"]
 
     def build_replies(self, payload) -> List[ABCSkillResponse]:
-        return [
-            ListCard(
-                header=ListCardHeader(title="원자재/리츠"),
-                items=[
-                    ListCardItem(title="PDBC(70%)", description="원자재 ETF"),
-                    ListCardItem(title="VNQ(30%)", description="리츠 ETF"),
-                ],
-            ),
-        ]
+        _portfolio = get_items(key="portfolio")
+        if _portfolio and "weights" in _portfolio:
+            return [
+                SimpleText(text=f"{_portfolio['base_date']} 기준 포트폴리오입니다."),
+                ItemCard(
+                    head=ItemCardHead(title=f"{_portfolio['base_date']} 생성"),
+                    itemList=[
+                        ItemListRow(title=k, description=v)
+                        for k, v in _portfolio["weights"].items()
+                    ],
+                ),
+            ]
+        return [SimpleText(text="최신 포트폴리오가 등록되지 않았습니다.")]
 
 
 class UniverseBot(MetaBot):
@@ -77,9 +97,7 @@ class UniverseBot(MetaBot):
         items = [
             CarouselListCardRow(
                 header=ListCardHeader(title=_sector_name),
-                items=[
-                    ListCardItem(**_asset) for _asset in _assets
-                ]
+                items=[ListCardItem(**_asset) for _asset in _assets],
             )
             for _sector_name, _assets in self.iter_items(payload)
         ]
@@ -103,16 +121,6 @@ class UniverseBot(MetaBot):
             ],
             "변동성": [
                 dict(title="VIXM", description="중기 변동성 ETF"),
-            ]
+            ],
         }
         return item_context.items()
-
-
-if __name__ == "__main__":
-    _tree = SectorTree(ETF_SECTORS)
-    CarouselListCardRow(
-        header=ListCardHeader(title="변동성"),
-        items=[
-            ListCardItem(title="VIXM", description="중기 변동성 ETF"),
-        ],
-    )

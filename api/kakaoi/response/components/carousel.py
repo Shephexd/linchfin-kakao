@@ -6,7 +6,7 @@ from api.kakaoi.response.components.common import (
     Button,
     ItemCardHead,
     ItemCardImageTitle,
-    ItemList,
+    ItemListRow,
     ItemListSummary,
 )
 
@@ -36,7 +36,7 @@ class CarouselItemCardRow(BaseModel):
     thumbnail: Thumbnail = None
     head: ItemCardHead = None
     imageTitle: ItemCardImageTitle = None
-    itemList: conlist(ItemList, min_items=1, max_items=5)
+    itemList: conlist(ItemListRow, min_items=1, max_items=5)
     itemListAlignment: str = "left"
     itemListSummary: ItemListSummary = None
     title: str = ""

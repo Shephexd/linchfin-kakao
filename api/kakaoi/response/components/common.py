@@ -95,7 +95,7 @@ class ItemListSummary(BaseModel):
     description: str
 
 
-class ItemList(BaseModel):
+class ItemListRow(BaseModel):
     title: str
     description: str
 

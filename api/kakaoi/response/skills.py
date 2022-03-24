@@ -10,7 +10,7 @@ from api.kakaoi.response.components.common import (
     ItemCardHead,
     ListCardHeader,
     ListCardItem,
-    ItemList,
+    ItemListRow,
     ItemListSummary,
     ItemCardImageTitle,
 )
@@ -29,7 +29,8 @@ class ABCSkillResponse(BaseModel, metaclass=ABCMeta):
         return _skill_name[0].lower() + _skill_name[1:]
 
     def dict(self, *args, **kwargs):
-        return {self.skill_name: super().dict()}
+        kwargs["exclude_none"] = True
+        return {self.skill_name: super().dict(*args, **kwargs)}
 
     def as_item(self):
         return self.__dict__.copy()
@@ -67,7 +68,7 @@ class ItemCard(ABCSkillResponse):
     thumbnail: Thumbnail = None
     head: ItemCardHead = None
     imageTitle: ItemCardImageTitle = None
-    itemList: conlist(ItemList, min_items=1, max_items=10)
+    itemList: conlist(ItemListRow, min_items=1, max_items=10)
     itemListAlignment: str = "left"
     itemListSummary: ItemListSummary = None
     title: str = ""
