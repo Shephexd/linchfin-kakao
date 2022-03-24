@@ -4,6 +4,8 @@ from api.kakaoi.response.components.common import (
     ListCardItem,
     ContextControl,
     ContextValue,
+    MessageButton,
+    WebLinkButton,
 )
 from api.kakaoi.response.components.carousel import CarouselListCardRow
 from api.kakaoi.response.skills import (
@@ -13,8 +15,7 @@ from api.kakaoi.response.skills import (
     SimpleText,
     QuickReply,
     ListCardHeader,
-    ListCard,
-    ItemCardHead,
+    Thumbnail,
     ItemCard,
     ItemListRow,
     ListCardCarousel,
@@ -51,18 +52,18 @@ class MetaBot:
 
     def get_context(self, payload: SkillPayload) -> ContextControl:
         return ContextControl(
-            values=payload.contexts
+            values=payload.get_next_contexts()
             + [
                 ContextValue(
                     name="payload",
                     lifeSpan=self.CONTEXT_LIFESPAN,
-                    params={"input_text", payload.input_text},
+                    params={"input_text": payload.input_text},
                 )
             ]
         )
 
     def get_data(self, payload: SkillPayload):
-        return {"input_text": payload.input_text}
+        return {}
 
     @classmethod
     def match(cls, input_text: str):
@@ -72,6 +73,7 @@ class MetaBot:
 
 class PortfolioBot(MetaBot):
     ACTION_KEYWORDS = ["포트폴리오"]
+    IMAGE_URL = "https://s3.us-west-2.amazonaws.com/secure.notion-static.com/5a7a3aaf-688b-4c27-ad79-08086817e05a/Portfolio.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220324T075834Z&X-Amz-Expires=86400&X-Amz-Signature=2d8e7198ffa41c976c08a90acf651165df6a7711cabd6e0b22cf563cd7d5c772&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Portfolio.png%22&x-id=GetObject"
 
     def build_replies(self, payload) -> List[ABCSkillResponse]:
         _portfolio = get_items(key="portfolio")
@@ -79,14 +81,24 @@ class PortfolioBot(MetaBot):
             return [
                 SimpleText(text=f"{_portfolio['base_date']} 기준 포트폴리오입니다."),
                 ItemCard(
-                    head=ItemCardHead(title=f"{_portfolio['base_date']} 생성"),
+                    thumbnail=self.get_thumbnail(),
                     itemList=[
-                        ItemListRow(title=k, description=v)
+                        ItemListRow(title=k, description=f"{round(float(v) * 100, 3)}%")
                         for k, v in _portfolio["weights"].items()
+                    ],
+                    description=f"{_portfolio['base_date']} 기준",
+                    buttons=[
+                        MessageButton(label="수량 계산", messageText="포트폴리오 수량 계산"),
+                        WebLinkButton(label="상세 보기", webLinkUrl=self.IMAGE_URL),
                     ],
                 ),
             ]
         return [SimpleText(text="최신 포트폴리오가 등록되지 않았습니다.")]
+
+    def get_thumbnail(self) -> Thumbnail:
+        return Thumbnail(
+            imageUrl=self.IMAGE_URL, width=800, height=400, fixedRatio=False
+        )
 
 
 class UniverseBot(MetaBot):
