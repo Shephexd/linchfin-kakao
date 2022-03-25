@@ -84,7 +84,11 @@ class PortfolioBot(MetaBot):
                     thumbnail=self.get_thumbnail(),
                     itemList=[
                         ItemListRow(title=k, description=f"{round(float(v) * 100, 3)}%")
-                        for k, v in _portfolio["weights"].items()
+                        for k, v in sorted(
+                            _portfolio["weights"].items(),
+                            key=lambda _w: _w[1],
+                            reverse=True,
+                        )
                     ],
                     description=f"{_portfolio['base_date']} 기준",
                     buttons=[
