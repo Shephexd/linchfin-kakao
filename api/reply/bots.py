@@ -25,8 +25,13 @@ from api.firebase.realtime import get_items
 
 
 class MetaBot:
+    bots = {}
     CONTEXT_LIFESPAN = 10
     ACTION_KEYWORDS = ["홈"]
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.bots[cls] = []
 
     def reply(self, payload: SkillPayload) -> SkillResponse:
         response_template = SkillResponse(
