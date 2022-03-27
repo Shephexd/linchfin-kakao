@@ -18,6 +18,7 @@ def decode_credential(encoded: str or bytes, encoding="utf-8") -> dict:
 
 FIREBASE = {
     "REALTIME_DB": os.getenv("FIREBASE_REALTIME_DB", ""),
+    "STORAGE_BUCKET": os.getenv("FIREBASE_BUCKET_NAME", ""),
 }
 try:
     FIREBASE["CREDENTIAL"] = decode_credential(os.getenv("FIREBASE_CREDENTIAL", ""))

@@ -13,7 +13,7 @@ class Thumbnail(BaseModel):
     link: Link = None
     fixedRatio: bool = None
     width: int
-    height: None
+    height: int
 
 
 class Button(BaseModel):
@@ -26,8 +26,12 @@ class Button(BaseModel):
     extra: dict = {}
 
 
+class MessageButton(Button):
+    action: str = "message"
+
+
 class WebLinkButton(Button):
-    action: str = "webLInk"
+    action: str = "webLink"
     webLinkUrl: str
 
 
@@ -103,6 +107,7 @@ class ItemListRow(BaseModel):
 class ContextValue(BaseModel):
     name: str
     lifeSpan: int = 10
+    ttl: int = 600
     params: dict = {}
 
 

@@ -1,40 +1,78 @@
 from pydantic import BaseModel
+from typing import List, Optional, Union, Dict
+from api.kakaoi.response.components.common import ContextValue
 
 
-class SkillPayloadIntentField(BaseModel):
+class IntentField(BaseModel):
+    class IntentExtraField(BaseModel):
+        class IntentKnowledgeField(BaseModel):
+            answer: str
+            question: str
+            categories: List[str]
+            landingUrl: str
+            imageUrl: str
+
+        knowledges: List[IntentKnowledgeField] = []
+
     id: str
     name: str
+    extra: Union[dict, IntentExtraField] = {}
 
 
-class SkillPayloadUserRequestField(BaseModel):
+class UserRequestField(BaseModel):
+    class UserRequestBlockField(BaseModel):
+        id: str
+        name: str
+
+    class UserRequestUserField(BaseModel):
+        class UserRequestUserPropertiesField(BaseModel):
+            plusfriendUserKey: Optional[str]
+            appUserId: Optional[str]
+            isFriend: bool = None
+
+        id: str
+        type: str
+        properties: UserRequestUserPropertiesField
+
     timezone: str
-    params: dict
-    block: dict
+    block: UserRequestBlockField
     utterance: str
-    lang: str = None
-    user: dict
+    lang: Optional[str] = None
+    user: UserRequestUserField
 
 
-class SkillPayloadBotField(BaseModel):
+class BotField(BaseModel):
     id: str
     name: str
 
 
-class SkillPayloadActionField(BaseModel):
-    name: str
-    clientExtra: dict = None
-    params: dict
+class ActionField(BaseModel):
     id: str
-    detailParams: dict
+    name: str
+    params: Dict[str, str]
+    detailParams: Dict[str, dict]
+    clientExtra: Optional[dict]
 
 
 class SkillPayload(BaseModel):
-    intent: SkillPayloadIntentField
-    userRequest: SkillPayloadUserRequestField
-    bot: SkillPayloadBotField
-    action: SkillPayloadActionField
-    contexts: list = []
+
+    intent: IntentField
+    userRequest: UserRequestField
+    bot: BotField
+    action: ActionField
+    contexts: List[ContextValue] = []
 
     @property
     def input_text(self) -> str:
         return self.userRequest.utterance
+
+    @property
+    def block_name(self) -> str:
+        return self.userRequest.block["name"]
+
+    def get_next_contexts(self):
+        return [
+            ContextValue(name=c.name, lifeSpan=c.lifeSpan - 1, params=c.params)
+            for c in self.contexts
+            if c.lifeSpan - 1 > 0
+        ]
