@@ -51,6 +51,7 @@ class MetaBot:
         quick_replies = [
             QuickReply(label="홈", messageText="홈"),
             QuickReply(label="포트폴리오", messageText="포트폴리오"),
+            QuickReply(label="백테스트", messageText="백테스트"),
             QuickReply(label="유니버스", messageText="유니버스"),
         ]
         return quick_replies
@@ -107,6 +108,26 @@ class PortfolioBot(MetaBot):
     def get_thumbnail(self) -> Thumbnail:
         return Thumbnail(
             imageUrl=self.IMAGE_URL, width=800, height=400, fixedRatio=False
+        )
+
+
+class BacktestBot(MetaBot):
+    ACTION_KEYWORDS = ["백테스트"]
+
+    IMAGE_URL = "https://linchfin-kakaoi.herokuapp.com/api/v1/backtest/result"
+
+    def build_replies(self, payload) -> List[ABCSkillResponse]:
+        return [
+            ItemCard(
+                thumbnail=self.get_thumbnail(),
+                itemList=[ItemListRow(title="AA", description="BBB")],
+                buttons=[MessageButton(label="포트폴리오", messageText="포트폴리오")],
+            )
+        ]
+
+    def get_thumbnail(self) -> Thumbnail:
+        return Thumbnail(
+            imageUrl=self.IMAGE_URL, width=800, height=800, fixedRatio=False
         )
 
 
