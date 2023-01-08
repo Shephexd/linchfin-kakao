@@ -1,4 +1,5 @@
 import io
+from typing import Optional, Union
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from api.reply.router import BotRouter
@@ -38,7 +39,7 @@ def get_key(item_id: str):
 
 
 @app.post("/api/v1/firebase/items")
-def update_key(item_id: str, payload: dict):
+def update_key(item_id: str, payload: Union[dict, list]):
     realtime.key_store.update({item_id: payload})
     return payload
 
