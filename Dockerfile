@@ -21,4 +21,4 @@ RUN pip3 install -r $WORKDIR/requirements.txt
 ADD . $WORKDIR
 WORKDIR $WORKDIR
 USER linchfin
-CMD ["/bin/bash", "$WORKDIR/conf/run.sh"]
+CMD ["/bin/bash", "$WORKDIR/run.sh"]
