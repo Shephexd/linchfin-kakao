@@ -46,7 +46,7 @@ class MetaBot:
         return response_template
 
     def build_replies(self, payload) -> List[ABCSkillResponse]:
-        return [ask_gpt_reply(input_msg=payload.input_text)]
+        return [SimpleText(text=ask_gpt_reply(input_msg=payload.input_text))]
 
     def build_quick_replies(self, payload: SkillPayload) -> List[QuickReply]:
         quick_replies = [
@@ -60,13 +60,13 @@ class MetaBot:
     def get_context(self, payload: SkillPayload) -> ContextControl:
         return ContextControl(
             values=payload.get_next_contexts()
-            + [
-                ContextValue(
-                    name="payload",
-                    lifeSpan=self.CONTEXT_LIFESPAN,
-                    params={"input_text": payload.input_text},
-                )
-            ]
+                   + [
+                       ContextValue(
+                           name="payload",
+                           lifeSpan=self.CONTEXT_LIFESPAN,
+                           params={"input_text": payload.input_text},
+                       )
+                   ]
         )
 
     def get_data(self, payload: SkillPayload):
