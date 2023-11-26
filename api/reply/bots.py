@@ -25,10 +25,10 @@ from api.firebase.realtime import get_items
 from actions.gpt.agent import ask_gpt_reply
 
 
-def divide_long_text(text: str) -> List[str]:
+def divide_long_text(text: str, block_text_size=300) -> List[str]:
     text_tokens = text.split("\n")
     token_size = len(text_tokens)
-    response_block_size = (len(text) // 500) + 1
+    response_block_size = (len(text) // block_text_size) + 1
 
     response_texts = []
     start, end = 0, -1
