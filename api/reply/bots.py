@@ -25,6 +25,22 @@ from api.firebase.realtime import get_items
 from actions.gpt.agent import ask_gpt_reply
 
 
+def divide_long_text(text: str) -> List[str]:
+    text_tokens = text.split("\n")
+    token_size = len(text_tokens)
+    response_block_size = (len(text) // 500) + 1
+
+    response_texts = []
+    start, end = 0, -1
+    for i in range(response_block_size):
+        end = (token_size * (i + 1)) // response_block_size
+        response_texts.append(
+            "\n".join(text_tokens[start:end])
+        )
+        start += end
+    return response_texts
+
+
 class MetaBot:
     bots = {}
     CONTEXT_LIFESPAN = 10
@@ -48,7 +64,12 @@ class MetaBot:
     def build_replies(self, payload) -> List[ABCSkillResponse]:
         input_history = [c.params["input_text"] for c in payload.contexts
                          if c.name == "payload" and "input_text" in c.params]
-        return [SimpleText(text=ask_gpt_reply(input_msg=payload.input_text, input_history=input_history))]
+        gpt_response = ask_gpt_reply(input_msg=payload.input_text, input_history=input_history)
+        if len(gpt_response) < 500:
+            return [SimpleText(text=gpt_response)]
+        else:
+            divided_texts = divide_long_text(text=gpt_response)
+            return [SimpleText(text=text) for text in divided_texts]
 
     def build_quick_replies(self, payload: SkillPayload) -> List[QuickReply]:
         quick_replies = [
