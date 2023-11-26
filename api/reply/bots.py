@@ -22,6 +22,7 @@ from api.kakaoi.response.skills import (
 )
 
 from api.firebase.realtime import get_items
+from actions.gpt.agent import ask_gpt_reply
 
 
 class MetaBot:
@@ -45,7 +46,7 @@ class MetaBot:
         return response_template
 
     def build_replies(self, payload) -> List[ABCSkillResponse]:
-        return [SimpleText(text=payload.input_text)]
+        return [ask_gpt_reply(input_msg=payload.input_text)]
 
     def build_quick_replies(self, payload: SkillPayload) -> List[QuickReply]:
         quick_replies = [
