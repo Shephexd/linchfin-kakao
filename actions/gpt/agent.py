@@ -1,5 +1,7 @@
 import os
+from typing import List, Type
 from openai import OpenAI, AuthenticationError
+
 
 GPT_API_KEY = os.getenv("GPT_API_KEY", "")
 MODEL = "gpt-3.5-turbo"
@@ -9,15 +11,20 @@ openai_client = OpenAI(
 )
 
 
-def ask_gpt_reply(input_msg):
+def ask_gpt_reply(input_msg, input_history: List[str] = None):
+    if input_history is None:
+        input_history = []
+
     try:
         response = openai_client.chat.completions.create(
             model=MODEL,
             messages=[
                 {"role": "system",
                  "content": "you are a helpful financial assistant for koreans. Need to translate response to korean"},
-                {"role": "user", "content": input_msg}
             ]
+            + input_history\
+            + [{"role": "user", "content": input_msg}]
+
         )
         if response.choices:
             return response.choices[0].message.content

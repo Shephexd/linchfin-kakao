@@ -46,7 +46,8 @@ class MetaBot:
         return response_template
 
     def build_replies(self, payload) -> List[ABCSkillResponse]:
-        return [SimpleText(text=ask_gpt_reply(input_msg=payload.input_text))]
+        input_history = [c.params["input_text"] for c in payload.contexts]
+        return [SimpleText(text=ask_gpt_reply(input_msg=payload.input_text, input_history=input_history))]
 
     def build_quick_replies(self, payload: SkillPayload) -> List[QuickReply]:
         quick_replies = [
